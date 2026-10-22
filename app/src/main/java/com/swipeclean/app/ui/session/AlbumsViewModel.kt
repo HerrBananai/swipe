@@ -2,6 +2,7 @@ package com.swipeclean.app.ui.session
 
 import android.app.Application
 import androidx.lifecycle.AndroidViewModel
+import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
@@ -43,7 +44,10 @@ class AlbumsViewModel(application: Application) : AndroidViewModel(application) 
 
     companion object {
         val Factory = viewModelFactory {
-            initializer { AlbumsViewModel(get<Application>()) }
+            initializer {
+                val app = this[ViewModelProvider.AndroidViewModelFactory.APPLICATION_KEY] as Application
+                AlbumsViewModel(app)
+            }
         }
     }
 }

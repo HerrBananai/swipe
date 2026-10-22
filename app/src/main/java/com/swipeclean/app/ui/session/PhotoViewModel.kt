@@ -1,6 +1,7 @@
 package com.swipeclean.app.ui.session
 
 import android.app.Application
+import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
 import com.swipeclean.app.data.media.MediaItem
@@ -22,7 +23,10 @@ class PhotoViewModel(
 
     companion object {
         fun factory(albumId: String) = viewModelFactory {
-            initializer { PhotoViewModel(get<Application>(), albumId) }
+            initializer {
+                val app = this[ViewModelProvider.AndroidViewModelFactory.APPLICATION_KEY] as Application
+                PhotoViewModel(app, albumId)
+            }
         }
     }
 }

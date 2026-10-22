@@ -34,7 +34,7 @@ fun rememberPermissionState(vararg permissions: String): PermissionState {
     }
 
     return remember(permissions.toList()) {
-        PermissionState(isGranted = { granted }, request = { launcher.launch(permissions.toList()) })
+        PermissionState(isGranted = { granted }, request = { launcher.launch(permissions) })
     }
 }
 
@@ -73,7 +73,7 @@ fun rememberMediaPermissionState(): MediaPermissionState {
         MediaPermissionState(
             isGranted = { granted },
             isPartial = { !fullAccess() && partialAccess() },
-            request = { launcher.launch(requiredMediaPermissions(sdk).toList()) },
+            request = { launcher.launch(requiredMediaPermissions(sdk)) },
         )
     }
 }

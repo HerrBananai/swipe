@@ -23,7 +23,26 @@ jobs:
         uses: gradle/actions/setup-gradle@v3
 
       - name: Build debug APK
-        run: ./gradlew assembleDebug --stacktrace
+        run: |
+          set -o pipefail
+          ./gradlew assembleDebug --stacktrace2>&1 | tee build-output.txt
+
+      - name: Publish errors to job summary
+        if: failure()
+        run: |
+          {
+            echo "### Build failed - last 250 log lines"
+            echo '```'
+            tail -250 build-output.txt
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Upload build log
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: build-log
+          path: build-output.txt
 
       - name: Upload APK artifact
         uses: actions/upload-artifact@v4

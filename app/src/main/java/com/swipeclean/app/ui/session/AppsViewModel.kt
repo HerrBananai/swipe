@@ -1,6 +1,7 @@
 package com.swipeclean.app.ui.session
 
 import android.app.Application
+import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
 import com.swipeclean.app.data.apps.AppEntry
@@ -19,7 +20,10 @@ class AppsViewModel(application: Application) : SwipeSessionViewModel<AppEntry>(
 
     companion object {
         val Factory = viewModelFactory {
-            initializer { AppsViewModel(get<Application>()) }
+            initializer {
+                val app = this[ViewModelProvider.AndroidViewModelFactory.APPLICATION_KEY] as Application
+                AppsViewModel(app)
+            }
         }
     }
 }
