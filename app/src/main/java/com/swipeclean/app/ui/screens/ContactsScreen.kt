@@ -30,7 +30,7 @@ fun ContactsScreen(onBack: () -> Unit) {
             title = "Allow access to your contacts",
             description = "SwipeClean needs to read your contacts so you can swipe through them. Left swipe deletes a contact — with a 2-second undo.",
             buttonText = "Grant access",
-            onRequest = permissions::request,
+            onRequest = { permissions.request() },
         )
         return
     }

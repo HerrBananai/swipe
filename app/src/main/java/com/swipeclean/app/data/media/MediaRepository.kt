@@ -57,7 +57,7 @@ class MediaRepository(private val context: Context) {
                     id = id,
                     uri = ContentUris.withAppendedId(filesUri(), id),
                     displayName = bucketName,
-                    isVideo = cursor.getLong(typeCol) == MediaStore.Files.FileColumns.MEDIA_TYPE_VIDEO,
+                    isVideo = cursor.getInt(typeCol) == MediaStore.Files.FileColumns.MEDIA_TYPE_VIDEO,
                     durationMs = 0,
                     sizeBytes = 0,
                     dateAddedSec = cursor.getLong(dateCol),
@@ -121,7 +121,7 @@ class MediaRepository(private val context: Context) {
                         id = id,
                         uri = ContentUris.withAppendedId(filesUri(), id),
                         displayName = cursor.getString(nameCol) ?: "item $id",
-                        isVideo = cursor.getLong(typeCol) == MediaStore.Files.FileColumns.MEDIA_TYPE_VIDEO,
+                        isVideo = cursor.getInt(typeCol) == MediaStore.Files.FileColumns.MEDIA_TYPE_VIDEO,
                         durationMs = if (durationCol >= 0) cursor.getLong(durationCol) else 0L,
                         sizeBytes = cursor.getLong(sizeCol),
                         dateAddedSec = cursor.getLong(dateCol),
@@ -140,7 +140,7 @@ class MediaRepository(private val context: Context) {
     fun trash(id: Long): Boolean {
         val uri = ContentUris.withAppendedId(filesUri(), id)
         return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-            val pendingIntent = MediaStore.createTrashRequest(resolver, uri, true)
+            val pendingIntent = MediaStore.createTrashRequest(resolver, listOf(uri), true)
             pendingIntent.send()
             true
         } else {

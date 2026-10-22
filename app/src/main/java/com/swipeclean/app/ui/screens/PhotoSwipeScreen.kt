@@ -42,7 +42,7 @@ fun PhotoSwipeScreen(
                 title = "Allow access to your photos",
                 description = "SwipeClean needs to see your photos and videos so you can swipe through them. Nothing leaves your device.",
                 buttonText = "Grant access",
-                onRequest = permissions::request,
+                onRequest = { permissions.request() },
                 note = if (Build.VERSION.SDK_INT >= 34) {
                     "You can also allow access to only selected photos."
                 } else {
@@ -88,7 +88,7 @@ fun PhotoSwipeScreen(
                     modifier = Modifier
                         .align(Alignment.TopCenter)
                         .padding(top = 8.dp),
-                    shape = MaterialTheme.shapes.Small,
+                    shape = MaterialTheme.shapes.small,
                     color = MaterialTheme.colorScheme.secondaryContainer,
                 ) {
                     Column(
@@ -102,7 +102,7 @@ fun PhotoSwipeScreen(
                             color = MaterialTheme.colorScheme.onSecondaryContainer,
                             textAlign = TextAlign.Center,
                         )
-                        TextButton(onClick = permissions::request) {
+                        TextButton(onClick = { permissions.request() }) {
                             Text("Choose more photos")
                         }
                     }

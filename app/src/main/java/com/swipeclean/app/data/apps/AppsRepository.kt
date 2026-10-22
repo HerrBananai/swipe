@@ -1,7 +1,7 @@
 package com.swipeclean.app.data.apps
 
 import android.content.ActivityNotFoundException
-import android.content.ApplicationInfo
+import android.content.pm.ApplicationInfo
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
