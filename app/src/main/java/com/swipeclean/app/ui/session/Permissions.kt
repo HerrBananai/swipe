@@ -34,7 +34,7 @@ fun rememberPermissionState(vararg permissions: String): PermissionState {
     }
 
     return remember(permissions.toList()) {
-        PermissionState(isGranted = { granted }, request = { launcher.launch(permissions.copyOf()) })
+        PermissionState(isGranted = { granted }, request = { launcher.launch(permissions.toList().toTypedArray()) })
     }
 }
 
