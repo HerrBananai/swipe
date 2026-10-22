@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <!-- Photos & videos (gallery cleanup mode) -->
+    <uses-permission
+        android:name="android.permission.READ_EXTERNAL_STORAGE"
+        android:maxSdkVersion="32" />
+    <uses-permission android:name="android.permission.READ_MEDIA_IMAGES" />
+    <uses-permission android:name="android.permission.READ_MEDIA_VIDEO" />
+    <!-- Android 14+ partial photo access -->
+    <uses-permission android:name="android.permission.READ_MEDIA_VISUAL_USER_SELECTED" />
+
+    <!-- Contacts cleanup mode -->
+    <uses-permission android:name="android.permission.READ_CONTACTS" />
+    <uses-permission android:name="android.permission.WRITE_CONTACTS" />
+
+    <!-- Needed to list and uninstall user apps (app declutter mode).
+         NOTE: QUERY_ALL_PACKAGES is restricted on Google Play; this app is meant to be
+         side-loaded (debug build / APK). Remove this and use <queries> if you ever publish. -->
+    <uses-permission android:name="android.permission.QUERY_ALL_PACKAGES" />
+
+    <application
+        android:allowBackup="true"
+        android:label="SwipeClean"
+        android:supportsRtl="true"
+        android:theme="@style/Theme.SwipeClean">
+
+        <activity
+            android:name=".MainActivity"
+            android:exported="true"
+            android:label="SwipeClean"
+            android:theme="@style/Theme.SwipeClean">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+    </application>
+</manifest>
