@@ -1,12 +1,13 @@
 # SwipeClean 🗑️
 
-A Tinder-style Android app for cleaning up your device — swipe right to **keep**, swipe left to **delete**.
+A Tinder-style Android app for cleaning up your device — swipe left to **keep**, swipe right to **delete**.
 
-Built with **Kotlin + Jetpack Compose** (Material 3, dynamic color).
+Built with **Kotlin + Jetpack Compose** (Material 3, dynamic color). Videos play inline on the
+card (muted by default — tap the speaker icon for sound).
 
 ## Modes (v1)
 
-| Mode | Right swipe | Left swipe |
+| Mode | Left swipe | Right swipe |
 |---|---|---|
 | **Photos & videos** | Keep | Move to trash (Android 10+ system trash, hard delete on older) |
 | **Contacts** | Keep | Delete the contact |

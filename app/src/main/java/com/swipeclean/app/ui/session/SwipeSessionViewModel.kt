@@ -22,7 +22,7 @@ private data class PendingAction<T>(val item: T, val job: Job)
 /**
  * Shared brains for every swipe mode (photos, contacts, apps).
  *
- * Swipe RIGHT = keep, swipe LEFT = delete. Left-swipes get a [GRACE_PERIOD_MS] grace
+ * Swipe LEFT = keep, swipe RIGHT = delete. Right-swipes get a [GRACE_PERIOD_MS] grace
  * window before the destructive action actually executes, so the Undo button can
  * bring the card back. This mirrors the "Gmail undo" pattern and makes deletion feel safe.
  */
@@ -65,19 +65,19 @@ abstract class SwipeSessionViewModel<T : Any>(application: Application) :
         }
     }
 
-    /** Call when the top card has animated off-screen. */
+    /** Call when the top card has animated off-screen. LEFT = keep, RIGHT = delete. */
     fun onSwiped(direction: SwipeDirection) {
         val list = _items.value
         if (list.isEmpty()) return
         val item = list.first()
         _items.value = list.drop(1)
 
-        if (direction == SwipeDirection.RIGHT) {
+        if (direction == SwipeDirection.LEFT) {
             _stats.value = _stats.value.copy(kept = _stats.value.kept + 1)
             return
         }
 
-        // Left swipe: schedule the actual deletion after a grace period so it can be undone.
+        // Right swipe: schedule the actual deletion after a grace period so it can be undone.
         _stats.value = _stats.value.copy(deleted = _stats.value.deleted + 1)
         val job = viewModelScope.launch {
             delay(GRACE_PERIOD_MS)

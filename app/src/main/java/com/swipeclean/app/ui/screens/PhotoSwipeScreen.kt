@@ -77,8 +77,8 @@ fun PhotoSwipeScreen(
                 modifier = Modifier
                     .fillMaxSize()
                     .padding(20.dp),
-                leftStamp = { DeleteStamp() },
-                rightStamp = { KeepStamp() },
+                leftStamp = { KeepStamp() },
+                rightStamp = { DeleteStamp() },
             ) { item ->
                 PhotoCard(item)
             }

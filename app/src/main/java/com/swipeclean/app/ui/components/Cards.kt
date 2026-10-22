@@ -1,5 +1,6 @@
 package com.swipeclean.app.ui.components
 
+import android.net.Uri
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -17,23 +18,39 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.Star
+import androidx.compose.material.icons.filled.VolumeOff
+import androidx.compose.material.icons.filled.VolumeUp
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.viewinterop.AndroidView
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleEventObserver
+import androidx.lifecycle.LifecycleOwner
+import androidx.media3.common.Player
+import androidx.media3.exoplayer.ExoPlayer
+import androidx.media3.ui.AspectRatioFrameLayout
+import androidx.media3.ui.PlayerView
 import coil.compose.AsyncImage
 import com.google.accompanist.drawablepainter.rememberDrawablePainter
 import com.swipeclean.app.data.apps.AppEntry
@@ -43,36 +60,64 @@ import com.swipeclean.app.util.formatBytes
 import com.swipeclean.app.util.formatDate
 import com.swipeclean.app.util.formatDuration
 
-/** Full-bleed photo/video card. Videos show a play badge and duration. */
+/**
+ * Full-bleed media card. Videos loop and play inline (muted by default —
+ * the speaker button on the badge toggles sound).
+ */
 @Composable
 fun PhotoCard(item: MediaItem, modifier: Modifier = Modifier) {
-    Box(modifier = modifier.fillMaxSize()) {
-        AsyncImage(
-            model = item.uri,
-            contentDescription = item.displayName,
-            contentScale = ContentScale.Crop,
-            modifier = Modifier.fillMaxSize(),
-        )
+    val player = if (item.isVideo) rememberVideoPlayer(item.uri) else null
+    var muted by remember(item.uri) { mutableStateOf(true) }
 
-        if (item.isVideo) {
+    Box(modifier = modifier.fillMaxSize()) {
+        if (player != null) {
+            AndroidView(
+                factory = { context ->
+                    PlayerView(context).apply {
+                        this.player = player
+                        useController = false
+                        resizeMode = AspectRatioFrameLayout.RESIZE_MODE_FIT
+                        setBackgroundColor(android.graphics.Color.BLACK)
+                    }
+                },
+                modifier = Modifier.fillMaxSize(),
+            )
+        } else {
+            AsyncImage(
+                model = item.uri,
+                contentDescription = item.displayName,
+                contentScale = ContentScale.Crop,
+                modifier = Modifier.fillMaxSize(),
+            )
+        }
+
+        if (player != null) {
             Surface(
                 modifier = Modifier
                     .align(Alignment.TopEnd)
-                    .padding(16.dp),
+                    .padding(12.dp),
                 shape = RoundedCornerShape(50),
                 color = Color.Black.copy(alpha = 0.55f),
             ) {
                 Row(
-                    modifier = Modifier.padding(horizontal = 10.dp, vertical = 5.dp),
+                    modifier = Modifier.padding(start = 4.dp, end = 12.dp, top = 2.dp, bottom = 2.dp),
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
-                    Icon(
-                        Icons.Filled.PlayArrow,
-                        contentDescription = null,
-                        tint = Color.White,
-                        modifier = Modifier.size(16.dp),
-                    )
-                    Spacer(Modifier.width(4.dp))
+                    IconButton(
+                        onClick = {
+                            muted = !muted
+                            player.volume = if (muted) 0f else 1f
+                        },
+                        modifier = Modifier.size(30.dp),
+                    ) {
+                        Icon(
+                            if (muted) Icons.Filled.VolumeOff else Icons.Filled.VolumeUp,
+                            contentDescription = if (muted) "Unmute video" else "Mute video",
+                            tint = Color.White,
+                            modifier = Modifier.size(18.dp),
+                        )
+                    }
+                    Spacer(Modifier.width(2.dp))
                     Text(
                         formatDuration(item.durationMs),
                         color = Color.White,
@@ -112,6 +157,46 @@ fun PhotoCard(item: MediaItem, modifier: Modifier = Modifier) {
             )
         }
     }
+}
+
+/**
+ * Creates an [ExoPlayer] that loops the given video, starts muted and auto-plays,
+ * pauses while the app is backgrounded, and is released when the card leaves composition.
+ */
+@Composable
+private fun rememberVideoPlayer(uri: Uri): ExoPlayer {
+    val context = LocalContext.current
+
+    val player = remember(uri) {
+        ExoPlayer.Builder(context).build().apply {
+            setMediaItem(androidx.media3.common.MediaItem.fromUri(uri))
+            repeatMode = Player.REPEAT_MODE_ALL
+            volume = 0f
+            playWhenReady = true
+            prepare()
+        }
+    }
+
+    DisposableEffect(uri) {
+        onDispose { player.release() }
+    }
+
+    val lifecycleOwner = context as? LifecycleOwner
+    if (lifecycleOwner != null) {
+        DisposableEffect(lifecycleOwner, player) {
+            val observer = LifecycleEventObserver { _, event ->
+                when (event) {
+                    Lifecycle.Event.ON_PAUSE -> player.playWhenReady = false
+                    Lifecycle.Event.ON_RESUME -> player.playWhenReady = true
+                    else -> Unit
+                }
+            }
+            lifecycleOwner.lifecycle.addObserver(observer)
+            onDispose { lifecycleOwner.lifecycle.removeObserver(observer) }
+        }
+    }
+
+    return player
 }
 
 /** Contact card with photo or colored initials. */

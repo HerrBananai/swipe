@@ -59,6 +59,10 @@ dependencies {
     implementation(libs.coil.compose)
     implementation(libs.coil.video)
 
+    // Inline video playback on the swipe cards
+    implementation(libs.androidx.media3.exoplayer)
+    implementation(libs.androidx.media3.ui)
+
     // Rendering PackageManager Drawables (app icons) in Compose
     implementation(libs.accompanist.drawablepainter)
 

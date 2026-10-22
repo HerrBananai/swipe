@@ -42,7 +42,7 @@ fun HomeScreen(onOpen: (Screen) -> Unit) {
         Text("SwipeClean", style = MaterialTheme.typography.headlineMedium, fontWeight = FontWeight.Bold)
         Spacer(Modifier.height(4.dp))
         Text(
-            "Swipe right to keep, left to delete.\nEverything has a 2-second undo.",
+            "Swipe left to keep, right to delete.\nEverything has a 2-second undo.",
             style = MaterialTheme.typography.bodyLarge,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
         )
@@ -57,13 +57,13 @@ fun HomeScreen(onOpen: (Screen) -> Unit) {
         ModeCard(
             icon = Icons.Outlined.People,
             title = "Contacts",
-            description = "Swipe through your address book. Left swipe deletes the contact.",
+            description = "Swipe through your address book. Right swipe deletes the contact.",
             onClick = { onOpen(Screen.Contacts) },
         )
         ModeCard(
             icon = Icons.Outlined.DeleteSweep,
             title = "App declutter",
-            description = "Find apps you never use. Left swipe opens the uninstall dialog.",
+            description = "Find apps you never use. Right swipe opens the uninstall dialog.",
             onClick = { onOpen(Screen.Apps) },
         )
 

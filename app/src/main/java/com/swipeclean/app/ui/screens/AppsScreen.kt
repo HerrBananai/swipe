@@ -41,8 +41,8 @@ fun AppsScreen(onBack: () -> Unit) {
                 modifier = Modifier
                     .fillMaxSize()
                     .padding(20.dp),
-                leftStamp = { DeleteStamp() },
-                rightStamp = { KeepStamp() },
+                leftStamp = { KeepStamp() },
+                rightStamp = { DeleteStamp() },
             ) { app ->
                 AppCard(app)
             }
