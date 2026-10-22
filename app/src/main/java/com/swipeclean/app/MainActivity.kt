@@ -10,6 +10,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateListOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import com.swipeclean.app.ui.screens.AppsScreen
 import com.swipeclean.app.ui.screens.AlbumsScreen
@@ -57,7 +58,7 @@ sealed interface Screen {
 
 @Composable
 private fun AppRoot() {
-    val backStack = mutableStateListOf<Screen>(Screen.Home)
+    val backStack = remember { mutableStateListOf<Screen>(Screen.Home) }
 
     fun push(screen: Screen) {
         backStack.add(screen)

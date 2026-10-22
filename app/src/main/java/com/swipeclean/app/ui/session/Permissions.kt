@@ -6,12 +6,16 @@ import android.os.Build
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.platform.LocalContext
 import androidx.core.content.ContextCompat
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleEventObserver
+import androidx.lifecycle.LifecycleOwner
 
 /**
  * Hand-rolled runtime permission helper.
@@ -27,6 +31,22 @@ fun rememberPermissionState(vararg permissions: String): PermissionState {
         ContextCompat.checkSelfPermission(context, permission) == PackageManager.PERMISSION_GRANTED
 
     var granted by remember { mutableStateOf(permissions.all { check(it) }) }
+
+    // Re-check when returning from system settings, in case the user granted
+    // the permission manually instead of via the in-app dialog.
+    val lifecycleOwner = LocalContext.current as? LifecycleOwner
+    if (lifecycleOwner != null) {
+        DisposableEffect(lifecycleOwner) {
+            val observer = LifecycleEventObserver { _, event ->
+                if (event == Lifecycle.Event.ON_RESUME) {
+                    granted = permissions.all { check(it) }
+                }
+            }
+            lifecycleOwner.lifecycle.addObserver(observer)
+            onDispose { lifecycleOwner.lifecycle.removeObserver(observer) }
+        }
+    }
+
     val launcher = rememberLauncherForActivityResult(
         ActivityResultContracts.RequestMultiplePermissions(),
     ) { results ->
@@ -61,6 +81,20 @@ fun rememberMediaPermissionState(): MediaPermissionState {
 
     var granted by remember {
         mutableStateOf(fullAccess() || partialAccess())
+    }
+
+    // Re-check when returning from system settings (manual grant flow).
+    val lifecycleOwner = LocalContext.current as? LifecycleOwner
+    if (lifecycleOwner != null) {
+        DisposableEffect(lifecycleOwner) {
+            val observer = LifecycleEventObserver { _, event ->
+                if (event == Lifecycle.Event.ON_RESUME) {
+                    granted = fullAccess() || partialAccess()
+                }
+            }
+            lifecycleOwner.lifecycle.addObserver(observer)
+            onDispose { lifecycleOwner.lifecycle.removeObserver(observer) }
+        }
     }
 
     val launcher = rememberLauncherForActivityResult(
