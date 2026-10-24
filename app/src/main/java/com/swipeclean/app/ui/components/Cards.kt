@@ -204,12 +204,20 @@ private fun rememberVideoPlayer(uri: Uri): ExoPlayer {
 @Composable
 fun FolderCard(album: Album, modifier: Modifier = Modifier) {
     Box(modifier = modifier.fillMaxSize()) {
-        AsyncImage(
-            model = album.cover.uri,
-            contentDescription = album.name,
-            contentScale = ContentScale.Crop,
-            modifier = Modifier.fillMaxSize(),
-        )
+        if (album.cover != null) {
+            AsyncImage(
+                model = album.cover.uri,
+                contentDescription = album.name,
+                contentScale = ContentScale.Crop,
+                modifier = Modifier.fillMaxSize(),
+            )
+        } else {
+            Box(
+                Modifier
+                    .fillMaxSize()
+                    .background(MaterialTheme.colorScheme.surfaceVariant),
+            )
+        }
 
         Surface(
             modifier = Modifier

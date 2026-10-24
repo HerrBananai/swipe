@@ -2,6 +2,7 @@ package com.swipeclean.app.discord
 
 import android.app.Application
 import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
 import com.swipeclean.app.ui.session.SwipeSessionViewModel
@@ -9,6 +10,7 @@ import com.swipeclean.app.util.ActivityProvider
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.launch
 
 /**
  * Session over the user's Discord servers. Right swipe = leave the server
@@ -46,14 +48,16 @@ class DiscordViewModel(
             return
         }
         _authError.value = null
-        repository.exchangeCode(rawCode)
-            .onSuccess {
-                _connected.value = true
-                refresh()
-            }
-            .onFailure { e ->
-                _authError.value = "Token exchange failed: ${e.message ?: e::class.simpleName}"
-            }
+        viewModelScope.launch {
+            repository.exchangeCode(rawCode)
+                .onSuccess {
+                    _connected.value = true
+                    refresh()
+                }
+                .onFailure { e ->
+                    _authError.value = "Token exchange failed: ${e.message ?: e::class.simpleName}"
+                }
+        }
     }
 
     override suspend fun loadItems(): List<Guild> {
