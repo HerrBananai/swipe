@@ -7,10 +7,13 @@ import androidx.lifecycle.viewmodel.viewModelFactory
 import com.swipeclean.app.data.media.MediaItem
 import com.swipeclean.app.data.media.MediaRepository
 
-/** Swipe session over the photos and videos of one album. */
+/**
+ * Swipe session over the photos and videos of one album — or every album at
+ * once when [albumId] is null ("swipe everything" mode).
+ */
 class PhotoViewModel(
     application: Application,
-    private val albumId: String,
+    private val albumId: String?,
 ) : SwipeSessionViewModel<MediaItem>(application) {
 
     private val repository = MediaRepository(application)
@@ -22,7 +25,7 @@ class PhotoViewModel(
     }
 
     companion object {
-        fun factory(albumId: String) = viewModelFactory {
+        fun factory(albumId: String?) = viewModelFactory {
             initializer {
                 val app = this[ViewModelProvider.AndroidViewModelFactory.APPLICATION_KEY] as Application
                 PhotoViewModel(app, albumId)

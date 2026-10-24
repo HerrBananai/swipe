@@ -55,6 +55,7 @@ import coil.compose.AsyncImage
 import com.google.accompanist.drawablepainter.rememberDrawablePainter
 import com.swipeclean.app.data.apps.AppEntry
 import com.swipeclean.app.data.contacts.ContactPerson
+import com.swipeclean.app.data.media.Album
 import com.swipeclean.app.data.media.MediaItem
 import com.swipeclean.app.util.formatBytes
 import com.swipeclean.app.util.formatDate
@@ -197,6 +198,64 @@ private fun rememberVideoPlayer(uri: Uri): ExoPlayer {
     }
 
     return player
+}
+
+/** Whole-folder card for the bulk cleanup deck: cover, count, and what's at stake. */
+@Composable
+fun FolderCard(album: Album, modifier: Modifier = Modifier) {
+    Box(modifier = modifier.fillMaxSize()) {
+        AsyncImage(
+            model = album.cover.uri,
+            contentDescription = album.name,
+            contentScale = ContentScale.Crop,
+            modifier = Modifier.fillMaxSize(),
+        )
+
+        Surface(
+            modifier = Modifier
+                .align(Alignment.TopStart)
+                .padding(12.dp),
+            shape = RoundedCornerShape(50),
+            color = Color.Black.copy(alpha = 0.55f),
+        ) {
+            Text(
+                "FOLDER · ${album.count} items",
+                color = Color.White,
+                style = MaterialTheme.typography.labelLarge,
+                modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp),
+            )
+        }
+
+        Box(
+            modifier = Modifier
+                .align(Alignment.BottomStart)
+                .fillMaxWidth()
+                .height(130.dp)
+                .background(
+                    Brush.verticalGradient(
+                        listOf(Color.Transparent, Color.Black.copy(alpha = 0.65f)),
+                    ),
+                ),
+        )
+        Column(
+            modifier = Modifier
+                .align(Alignment.BottomStart)
+                .padding(20.dp),
+        ) {
+            Text(
+                album.name,
+                color = Color.White,
+                style = MaterialTheme.typography.titleLarge,
+                maxLines = 2,
+                overflow = TextOverflow.Ellipsis,
+            )
+            Text(
+                "Right swipe trashes all ${album.count} items",
+                color = Color.White.copy(alpha = 0.85f),
+                style = MaterialTheme.typography.bodyMedium,
+            )
+        }
+    }
 }
 
 /** Contact card with photo or colored initials. */

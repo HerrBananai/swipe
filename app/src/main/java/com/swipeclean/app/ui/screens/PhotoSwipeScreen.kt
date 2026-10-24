@@ -30,7 +30,7 @@ import com.swipeclean.app.ui.session.rememberMediaPermissionState
 
 @Composable
 fun PhotoSwipeScreen(
-    albumId: String,
+    albumId: String?,
     albumName: String,
     onBack: () -> Unit,
 ) {
@@ -54,7 +54,7 @@ fun PhotoSwipeScreen(
     }
 
     val viewModel: PhotoViewModel = viewModel(
-        key = "photo-$albumId",
+        key = "photo-${albumId ?: "all"}",
         factory = PhotoViewModel.factory(albumId),
     )
     val items by viewModel.items.collectAsState()
@@ -66,7 +66,11 @@ fun PhotoSwipeScreen(
         title = albumName,
         subtitle = "${items.size} left to review",
         status = status,
-        emptyText = "All done! You reviewed every photo in this album. 🎉",
+        emptyText = if (albumId == null) {
+            "All done! You reviewed every photo and video on this device. 🎉"
+        } else {
+            "All done! You reviewed every photo in this album. 🎉"
+        },
         onBack = onBack,
         onRetry = viewModel::refresh,
     ) {

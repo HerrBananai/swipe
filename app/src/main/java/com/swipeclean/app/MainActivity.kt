@@ -1,5 +1,6 @@
 package com.swipeclean.app
 
+import android.content.Intent
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.BackHandler
@@ -12,9 +13,12 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import com.swipeclean.app.discord.DiscordOAuthState
 import com.swipeclean.app.ui.screens.AppsScreen
 import com.swipeclean.app.ui.screens.AlbumsScreen
 import com.swipeclean.app.ui.screens.ContactsScreen
+import com.swipeclean.app.ui.screens.DiscordScreen
+import com.swipeclean.app.ui.screens.FolderSwipeScreen
 import com.swipeclean.app.ui.screens.HomeScreen
 import com.swipeclean.app.ui.screens.PhotoSwipeScreen
 import com.swipeclean.app.ui.theme.SwipeCleanTheme
@@ -24,6 +28,8 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
+        // Discord OAuth redirect (swipeclean://oauth?code=...) if we were launched by it
+        DiscordOAuthState.submit(intent)
         setContent {
             SwipeCleanTheme {
                 Surface(
@@ -34,6 +40,12 @@ class MainActivity : ComponentActivity() {
                 }
             }
         }
+    }
+
+    override fun onNewIntent(intent: Intent) {
+        super.onNewIntent(intent)
+        setIntent(intent)
+        DiscordOAuthState.submit(intent)
     }
 
     override fun onResume() {
@@ -52,8 +64,11 @@ sealed interface Screen {
     data object Home : Screen
     data object Albums : Screen
     data class PhotoAlbum(val albumId: String, val albumName: String) : Screen
+    data object AllPhotos : Screen
+    data object Folders : Screen
     data object Contacts : Screen
     data object Apps : Screen
+    data object Discord : Screen
 }
 
 @Composable
@@ -80,7 +95,14 @@ private fun AppRoot() {
             albumName = screen.albumName,
             onBack = ::pop,
         )
+        Screen.AllPhotos -> PhotoSwipeScreen(
+            albumId = null,
+            albumName = "All photos & videos",
+            onBack = ::pop,
+        )
+        Screen.Folders -> FolderSwipeScreen(onBack = ::pop)
         Screen.Contacts -> ContactsScreen(onBack = ::pop)
         Screen.Apps -> AppsScreen(onBack = ::pop)
+        Screen.Discord -> DiscordScreen(onBack = ::pop)
     }
 }

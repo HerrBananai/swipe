@@ -79,8 +79,11 @@ class MediaRepository(private val context: Context) {
         }.sortedBy { it.name.lowercase() }
     }
 
-    /** All photos & videos in one album, newest first. */
-    fun loadMedia(albumId: String): List<MediaItem> {
+    /**
+     * All photos & videos, newest first. Pass an albumId to filter to one album,
+     * or null to sweep every album (the "swipe everything" mode).
+     */
+    fun loadMedia(albumId: String?): List<MediaItem> {
         val projection = arrayOf(
             MediaStore.Files.FileColumns._ID,
             MediaStore.Files.FileColumns.MEDIA_TYPE,
@@ -90,13 +93,23 @@ class MediaRepository(private val context: Context) {
             MediaStore.Video.VideoColumns.DURATION,
             bucketIdColumn,
         )
-        val selection =
-            "${MediaStore.Files.FileColumns.MEDIA_TYPE} IN (?,?) AND ${bucketIdColumn} = ?"
-        val selectionArgs = arrayOf(
-            MediaStore.Files.FileColumns.MEDIA_TYPE_IMAGE.toString(),
-            MediaStore.Files.FileColumns.MEDIA_TYPE_VIDEO.toString(),
-            albumId,
-        )
+        val selection: String
+        val selectionArgs: Array<String>
+        if (albumId == null) {
+            selection = "${MediaStore.Files.FileColumns.MEDIA_TYPE} IN (?,?)"
+            selectionArgs = arrayOf(
+                MediaStore.Files.FileColumns.MEDIA_TYPE_IMAGE.toString(),
+                MediaStore.Files.FileColumns.MEDIA_TYPE_VIDEO.toString(),
+            )
+        } else {
+            selection =
+                "${MediaStore.Files.FileColumns.MEDIA_TYPE} IN (?,?) AND ${bucketIdColumn} = ?"
+            selectionArgs = arrayOf(
+                MediaStore.Files.FileColumns.MEDIA_TYPE_IMAGE.toString(),
+                MediaStore.Files.FileColumns.MEDIA_TYPE_VIDEO.toString(),
+                albumId,
+            )
+        }
 
         val result = mutableListOf<MediaItem>()
         resolver.query(
@@ -125,7 +138,7 @@ class MediaRepository(private val context: Context) {
                         durationMs = if (durationCol >= 0) cursor.getLong(durationCol) else 0L,
                         sizeBytes = cursor.getLong(sizeCol),
                         dateAddedSec = cursor.getLong(dateCol),
-                        albumId = cursor.getString(bucketIdCol) ?: albumId,
+                        albumId = cursor.getString(bucketIdCol) ?: albumId ?: "unknown",
                     ),
                 )
             }
@@ -145,6 +158,23 @@ class MediaRepository(private val context: Context) {
             true
         } else {
             resolver.delete(uri, null, null) > 0
+        }
+    }
+
+    /**
+     * Moves every item in an album (folder) to the system trash in one request —
+     * the "bulk folder cleanup" mode. Pre-Android 10 devices hard-delete item by item.
+     */
+    fun trashAlbum(albumId: String): Boolean {
+        val items = loadMedia(albumId)
+        if (items.isEmpty()) return true
+        return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+            val uris = items.map { ContentUris.withAppendedId(filesUri(), it.id) }
+            val pendingIntent = MediaStore.createTrashRequest(resolver, uris, true)
+            pendingIntent.send()
+            true
+        } else {
+            items.all { resolver.delete(ContentUris.withAppendedId(filesUri(), it.id), null, null) > 0 }
         }
     }
 

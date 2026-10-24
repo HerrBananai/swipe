@@ -15,7 +15,10 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
+import androidx.compose.material.icons.outlined.Collections
 import androidx.compose.material.icons.outlined.DeleteSweep
+import androidx.compose.material.icons.outlined.FolderDelete
+import androidx.compose.material.icons.outlined.Forum
 import androidx.compose.material.icons.outlined.PhotoLibrary
 import androidx.compose.material.icons.outlined.People
 import androidx.compose.material3.Card
@@ -55,6 +58,18 @@ fun HomeScreen(onOpen: (Screen) -> Unit) {
             onClick = { onOpen(Screen.Albums) },
         )
         ModeCard(
+            icon = Icons.Outlined.Collections,
+            title = "Swipe everything",
+            description = "One deck with every photo and video on the device. No album picking.",
+            onClick = { onOpen(Screen.AllPhotos) },
+        )
+        ModeCard(
+            icon = Icons.Outlined.FolderDelete,
+            title = "Folder cleanup",
+            description = "Swipe whole folders. Right swipe trashes everything inside at once.",
+            onClick = { onOpen(Screen.Folders) },
+        )
+        ModeCard(
             icon = Icons.Outlined.People,
             title = "Contacts",
             description = "Swipe through your address book. Right swipe deletes the contact.",
@@ -66,10 +81,16 @@ fun HomeScreen(onOpen: (Screen) -> Unit) {
             description = "Find apps you never use. Right swipe opens the uninstall dialog.",
             onClick = { onOpen(Screen.Apps) },
         )
+        ModeCard(
+            icon = Icons.Outlined.Forum,
+            title = "Discord servers",
+            description = "Sign in, then swipe: right swipe leaves the server. Setup required.",
+            onClick = { onOpen(Screen.Discord) },
+        )
 
         Spacer(Modifier.height(24.dp))
         Text(
-            "More modes coming later: email triage, bookmarks, task cleanup — and maybe Discord servers.",
+            "More modes coming later: email triage, bookmarks, task cleanup.",
             style = MaterialTheme.typography.bodyMedium,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
         )

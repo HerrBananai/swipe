@@ -63,6 +63,9 @@ dependencies {
     implementation(libs.androidx.media3.exoplayer)
     implementation(libs.androidx.media3.ui)
 
+    // Custom Tabs (Discord OAuth flow)
+    implementation(libs.androidx.browser)
+
     // Rendering PackageManager Drawables (app icons) in Compose
     implementation(libs.accompanist.drawablepainter)
 
